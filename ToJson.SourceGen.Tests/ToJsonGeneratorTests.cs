@@ -12,6 +12,12 @@ namespace ToJson.SourceGen.Tests
             PropertyNamingPolicy = null
         };
 
+        private readonly JsonSerializerOptions _indentedJsonOptions = new()
+        {
+            PropertyNamingPolicy = null,
+            WriteIndented = true
+        };
+
         [Fact]
         public void SimpleModel_ToJson_MatchesSystemTextJson()
         {
@@ -305,6 +311,112 @@ namespace ToJson.SourceGen.Tests
 
             string generatedJson = model.ToJson();
             string systemTextJson = JsonSerializer.Serialize(model, _jsonOptions);
+
+            Assert.Equal(systemTextJson, generatedJson);
+        }
+
+        // Indented formatting tests
+
+        [Fact]
+        public void SimpleModel_ToJsonIndented_MatchesSystemTextJson()
+        {
+            SimpleModel model = new()
+            {
+                Id = 42,
+                Name = "Test",
+                IsActive = true
+            };
+
+            string generatedJson = model.ToJson(true);
+            string systemTextJson = JsonSerializer.Serialize(model, _indentedJsonOptions);
+
+            Assert.Equal(systemTextJson, generatedJson);
+        }
+
+        [Fact]
+        public void ComplexModel_ToJsonIndented_MatchesSystemTextJson()
+        {
+            ComplexModel model = new()
+            {
+                Id = 999,
+                Name = "Complex Test",
+                Price = 49.99,
+                Available = true,
+                Description = "A complex model"
+            };
+
+            string generatedJson = model.ToJson(true);
+            string systemTextJson = JsonSerializer.Serialize(model, _indentedJsonOptions);
+
+            Assert.Equal(systemTextJson, generatedJson);
+        }
+
+        [Fact]
+        public void NestedModel_ToJsonIndented_MatchesSystemTextJson()
+        {
+            NestedModel model = new()
+            {
+                Id = 1,
+                NestedObject = new SimpleModel
+                {
+                    Id = 2,
+                    Name = "Nested",
+                    IsActive = true
+                }
+            };
+
+            string generatedJson = model.ToJson(true);
+            string systemTextJson = JsonSerializer.Serialize(model, _indentedJsonOptions);
+
+            Assert.Equal(systemTextJson, generatedJson);
+        }
+
+        [Fact]
+        public void ArrayModel_ToJsonIndented_MatchesSystemTextJson()
+        {
+            ArrayModel model = new()
+            {
+                Numbers = new[] { 1, 2, 3, 4, 5 },
+                Names = new[] { "Alice", "Bob", "Charlie" }
+            };
+
+            string generatedJson = model.ToJson(true);
+            string systemTextJson = JsonSerializer.Serialize(model, _indentedJsonOptions);
+
+            Assert.Equal(systemTextJson, generatedJson);
+        }
+
+        [Fact]
+        public void NestedCollectionModel_ToJsonIndented_MatchesSystemTextJson()
+        {
+            NestedCollectionModel model = new()
+            {
+                Id = 100,
+                Items = new List<SimpleModel>
+                {
+                    new() { Id = 1, Name = "First", IsActive = true },
+                    new() { Id = 2, Name = "Second", IsActive = false }
+                }
+            };
+
+            string generatedJson = model.ToJson(true);
+            string systemTextJson = JsonSerializer.Serialize(model, _indentedJsonOptions);
+
+            Assert.Equal(systemTextJson, generatedJson);
+        }
+
+        [Fact]
+        public void NullableModel_WithNulls_ToJsonIndented_MatchesSystemTextJson()
+        {
+            NullableModel model = new()
+            {
+                NullableString = null,
+                NullableInt = null,
+                NullableBool = null
+            };
+
+            string generatedJson = model.ToJson(true);
+            string systemTextJson = JsonSerializer.Serialize(model, _indentedJsonOptions);
 
             Assert.Equal(systemTextJson, generatedJson);
         }

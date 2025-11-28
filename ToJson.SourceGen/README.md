@@ -7,6 +7,7 @@ A C# source generator that automatically creates JSON serialization methods for 
 - **Zero runtime overhead** - Code is generated at compile time
 - **Simple API** - Just add the `[ToJson]` attribute to your class
 - **Type-safe** - Generated code is strongly typed
+- **Formatting options** - Supports both compact and indented JSON output
 - **Collections and arrays** - Supports arrays, `List<T>`, and other `IEnumerable<T>` types
 - **Nested object support** - Automatically handles nested objects with `[ToJson]` attribute
 - **Proper JSON escaping** - Uses `System.Text.Json.JsonEncodedText` for string encoding
@@ -196,6 +197,39 @@ string json = company.ToJson();
 // Output: {"Id":1,"Name":"Acme Corp","Employees":[{"Id":1,"Name":"Alice"},{"Id":2,"Name":"Bob"}]}
 ```
 
+### Indented Formatting
+
+```csharp
+[ToJson]
+public partial class Product
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public decimal Price { get; set; }
+}
+
+var product = new Product
+{
+    Id = 1,
+    Name = "Widget",
+    Price = 19.99m
+};
+
+// Compact output (default)
+string compact = product.ToJson();
+// Output: {"Id":1,"Name":"Widget","Price":19.99}
+
+// Indented output
+string indented = product.ToJson(true);
+/* Output:
+{
+  "Id": 1,
+  "Name": "Widget",
+  "Price": 19.99
+}
+*/
+```
+
 ## Important Notes
 
 ### Classes Must Be Partial
@@ -261,7 +295,6 @@ Since code is generated at compile time, there is:
 ## Limitations
 
 - No custom naming policies (always uses property names as-is)
-- No indentation or formatting options
 - No circular reference detection
 - No polymorphism support
 - No support for dictionaries or non-generic collections
