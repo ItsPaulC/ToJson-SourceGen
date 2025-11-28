@@ -125,13 +125,19 @@ namespace ToJson
             // Generate main method with indentation parameter
             sb.AppendLine("        public string ToJson(bool indented)");
             sb.AppendLine("        {");
-            sb.AppendLine("            return ToJsonCore(indented, 0);");
+            sb.AppendLine("            var visited = new System.Collections.Generic.HashSet<object>(System.Collections.Generic.ReferenceEqualityComparer.Instance);");
+            sb.AppendLine("            return ToJsonCore(indented, 0, visited);");
             sb.AppendLine("        }");
             sb.AppendLine();
 
             // Generate core implementation
-            sb.AppendLine("        public string ToJsonCore(bool indented, int depth)");
+            sb.AppendLine("        public string ToJsonCore(bool indented, int depth, System.Collections.Generic.HashSet<object> visited)");
             sb.AppendLine("        {");
+            sb.AppendLine("            if (!visited.Add(this))");
+            sb.AppendLine("            {");
+            sb.AppendLine("                throw new System.Text.Json.JsonException(\"Circular reference detected in object graph.\");");
+            sb.AppendLine("            }");
+            sb.AppendLine();
             sb.AppendLine("            var sb = new System.Text.StringBuilder();");
             sb.AppendLine("            string indent = indented ? new string(' ', depth * 2) : \"\";");
             sb.AppendLine("            string indent2 = indented ? new string(' ', (depth + 1) * 2) : \"\";");
@@ -180,7 +186,7 @@ namespace ToJson
                 sb.AppendLine($"            sb.Append(\"\\\"{memberName}\\\":\");");
                 sb.AppendLine("            if (indented) sb.Append(\" \");");
 
-                string valueExpression = GenerateValueExpression(memberType, memberName, "indented", "depth");
+                string valueExpression = GenerateValueExpression(memberType, memberName, "indented", "depth", "visited");
                 sb.AppendLine($"            sb.Append({valueExpression});");
             }
 
@@ -203,26 +209,26 @@ namespace ToJson
             return sb.ToString();
         }
 
-        private static string GenerateValueExpression(ITypeSymbol typeSymbol, string memberName, string indentedVar = "false", string depthVar = "0")
+        private static string GenerateValueExpression(ITypeSymbol typeSymbol, string memberName, string indentedVar = "false", string depthVar = "0", string visitedVar = "null")
         {
             // Handle nullable value types
             if (typeSymbol is INamedTypeSymbol { IsValueType: true, NullableAnnotation: NullableAnnotation.Annotated } namedTypeSymbol)
             {
                 ITypeSymbol underlyingType = namedTypeSymbol.TypeArguments.FirstOrDefault() ?? typeSymbol;
-                string underlyingExpression = GenerateValueExpression(underlyingType, $"{memberName}.Value", indentedVar, depthVar);
+                string underlyingExpression = GenerateValueExpression(underlyingType, $"{memberName}.Value", indentedVar, depthVar, visitedVar);
                 return $"({memberName}.HasValue ? {underlyingExpression} : \"null\")";
             }
 
             // Handle arrays
             if (typeSymbol is IArrayTypeSymbol arrayType)
             {
-                return GenerateArrayExpression(arrayType, memberName, indentedVar, depthVar);
+                return GenerateArrayExpression(arrayType, memberName, indentedVar, depthVar, visitedVar);
             }
 
             // Handle collections (IEnumerable<T>)
             if (TryGetEnumerableElementType(typeSymbol, out ITypeSymbol? elementType))
             {
-                return GenerateCollectionExpression(elementType!, memberName, indentedVar, depthVar);
+                return GenerateCollectionExpression(elementType!, memberName, indentedVar, depthVar, visitedVar);
             }
 
             // Handle null for reference types
@@ -266,7 +272,7 @@ namespace ToJson
 
                         if (hasToJsonAttribute || toJsonMethod != null)
                         {
-                            return $"{nullCheck}{memberName}.ToJsonCore({indentedVar}, {depthVar} + 1){nullCheckClose}";
+                            return $"{nullCheck}{memberName}.ToJsonCore({indentedVar}, {depthVar} + 1, {visitedVar}){nullCheckClose}";
                         }
                     }
 
@@ -275,29 +281,29 @@ namespace ToJson
             }
         }
 
-        private static string GenerateArrayExpression(IArrayTypeSymbol arrayType, string memberName, string indentedVar, string depthVar)
+        private static string GenerateArrayExpression(IArrayTypeSymbol arrayType, string memberName, string indentedVar, string depthVar, string visitedVar)
         {
             ITypeSymbol elementType = arrayType.ElementType;
-            return GenerateCollectionExpression(elementType, memberName, indentedVar, depthVar);
+            return GenerateCollectionExpression(elementType, memberName, indentedVar, depthVar, visitedVar);
         }
 
-        private static string GenerateCollectionExpression(ITypeSymbol elementType, string memberName, string indentedVar, string depthVar)
+        private static string GenerateCollectionExpression(ITypeSymbol elementType, string memberName, string indentedVar, string depthVar, string visitedVar)
         {
             // Generate a unique variable name for the loop
             string itemVar = $"item_{memberName}";
-            string itemExpression = GenerateValueExpression(elementType, itemVar, indentedVar, depthVar);
+            string itemExpression = GenerateValueExpression(elementType, itemVar, indentedVar, depthVar, visitedVar);
 
             // Generate method call for formatting collection
-            return $"FormatCollection_{memberName}({memberName}, {indentedVar}, {depthVar})";
+            return $"FormatCollection_{memberName}({memberName}, {indentedVar}, {depthVar}, {visitedVar})";
         }
 
         private static string GenerateCollectionHelperMethod(string memberName, ITypeSymbol elementType, string className)
         {
             string itemVar = $"item_{memberName}";
-            string itemExpression = GenerateValueExpression(elementType, itemVar, "indented", "depth + 1");
+            string itemExpression = GenerateValueExpression(elementType, itemVar, "indented", "depth + 1", "visited");
 
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine($"        private static string FormatCollection_{memberName}(System.Collections.Generic.IEnumerable<{elementType.ToDisplayString()}> collection, bool indented, int depth)");
+            sb.AppendLine($"        private static string FormatCollection_{memberName}(System.Collections.Generic.IEnumerable<{elementType.ToDisplayString()}> collection, bool indented, int depth, System.Collections.Generic.HashSet<object> visited)");
             sb.AppendLine("        {");
             sb.AppendLine("            if (collection == null) return \"null\";");
             sb.AppendLine("            var sb = new System.Text.StringBuilder();");

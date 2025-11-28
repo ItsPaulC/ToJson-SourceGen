@@ -10,6 +10,7 @@ A C# source generator that automatically creates JSON serialization methods for 
 - **Formatting options** - Supports both compact and indented JSON output
 - **Collections and arrays** - Supports arrays, `List<T>`, and other `IEnumerable<T>` types
 - **Nested object support** - Automatically handles nested objects with `[ToJson]` attribute
+- **Circular reference detection** - Detects and throws `JsonException` for circular references
 - **Proper JSON escaping** - Uses `System.Text.Json.JsonEncodedText` for string encoding
 - **Nullable support** - Correctly handles nullable value types and reference types
 
@@ -260,9 +261,34 @@ string json = obj.ToJson();
 // Output: {"Text":"Hello \"World\""}
 ```
 
-### No Circular References
+### Circular Reference Detection
 
-The generator does not handle circular references. Attempting to serialize objects with circular references will cause a stack overflow.
+The generator automatically detects circular references in object graphs and throws a `System.Text.Json.JsonException` when encountered:
+
+```csharp
+[ToJson]
+public partial class Node
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public Node? Next { get; set; }
+}
+
+// This will throw JsonException
+var node1 = new Node { Id = 1, Name = "First" };
+var node2 = new Node { Id = 2, Name = "Second" };
+node1.Next = node2;
+node2.Next = node1; // Circular reference!
+
+try
+{
+    string json = node1.ToJson();
+}
+catch (System.Text.Json.JsonException ex)
+{
+    // ex.Message: "Circular reference detected in object graph."
+}
+```
 
 ## Requirements
 
@@ -295,7 +321,6 @@ Since code is generated at compile time, there is:
 ## Limitations
 
 - No custom naming policies (always uses property names as-is)
-- No circular reference detection
 - No polymorphism support
 - No support for dictionaries or non-generic collections
 

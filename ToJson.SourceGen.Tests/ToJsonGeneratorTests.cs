@@ -420,5 +420,149 @@ namespace ToJson.SourceGen.Tests
 
             Assert.Equal(systemTextJson, generatedJson);
         }
+
+        // Circular reference detection tests
+
+        [Fact]
+        public void CircularParent_WithCircularChild_ThrowsJsonException()
+        {
+            CircularParent parent = new()
+            {
+                Id = 1,
+                Name = "Parent"
+            };
+
+            CircularChild child = new()
+            {
+                Id = 2,
+                Name = "Child",
+                Parent = parent
+            };
+
+            parent.Child = child;
+
+            Assert.Throws<System.Text.Json.JsonException>(() => parent.ToJson());
+        }
+
+        [Fact]
+        public void CircularChild_WithCircularParent_ThrowsJsonException()
+        {
+            CircularParent parent = new()
+            {
+                Id = 1,
+                Name = "Parent"
+            };
+
+            CircularChild child = new()
+            {
+                Id = 2,
+                Name = "Child",
+                Parent = parent
+            };
+
+            parent.Child = child;
+
+            Assert.Throws<System.Text.Json.JsonException>(() => child.ToJson());
+        }
+
+        [Fact]
+        public void SelfReferencingModel_WithCircularReference_ThrowsJsonException()
+        {
+            SelfReferencingModel model = new()
+            {
+                Id = 1,
+                Name = "Node1"
+            };
+
+            // Create circular reference to itself
+            model.Next = model;
+
+            Assert.Throws<System.Text.Json.JsonException>(() => model.ToJson());
+        }
+
+        [Fact]
+        public void SelfReferencingModel_WithChainedCircularReference_ThrowsJsonException()
+        {
+            SelfReferencingModel node1 = new()
+            {
+                Id = 1,
+                Name = "Node1"
+            };
+
+            SelfReferencingModel node2 = new()
+            {
+                Id = 2,
+                Name = "Node2"
+            };
+
+            SelfReferencingModel node3 = new()
+            {
+                Id = 3,
+                Name = "Node3"
+            };
+
+            // Create a chain that loops back
+            node1.Next = node2;
+            node2.Next = node3;
+            node3.Next = node1; // Circular!
+
+            Assert.Throws<System.Text.Json.JsonException>(() => node1.ToJson());
+        }
+
+        [Fact]
+        public void SelfReferencingModel_WithoutCircularReference_Serializes()
+        {
+            SelfReferencingModel node1 = new()
+            {
+                Id = 1,
+                Name = "Node1"
+            };
+
+            SelfReferencingModel node2 = new()
+            {
+                Id = 2,
+                Name = "Node2"
+            };
+
+            SelfReferencingModel node3 = new()
+            {
+                Id = 3,
+                Name = "Node3"
+            };
+
+            // Create a chain without circular reference
+            node1.Next = node2;
+            node2.Next = node3;
+            // node3.Next is null
+
+            // Should not throw
+            string json = node1.ToJson();
+            Assert.NotNull(json);
+            Assert.Contains("\"Id\":1", json);
+            Assert.Contains("\"Id\":2", json);
+            Assert.Contains("\"Id\":3", json);
+        }
+
+        [Fact]
+        public void CircularParent_WithoutCircularReference_Serializes()
+        {
+            CircularParent parent = new()
+            {
+                Id = 1,
+                Name = "Parent",
+                Child = new CircularChild
+                {
+                    Id = 2,
+                    Name = "Child",
+                    Parent = null // No circular reference
+                }
+            };
+
+            // Should not throw
+            string json = parent.ToJson();
+            Assert.NotNull(json);
+            Assert.Contains("\"Id\":1", json);
+            Assert.Contains("\"Id\":2", json);
+        }
     }
 }

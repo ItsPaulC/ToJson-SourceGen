@@ -80,4 +80,28 @@ namespace ToJson.SourceGen.Tests
         public int[] EmptyArray { get; set; } = Array.Empty<int>();
         public List<string> EmptyList { get; set; } = new();
     }
+
+    [ToJson]
+    public partial class CircularParent
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public CircularChild? Child { get; set; }
+    }
+
+    [ToJson]
+    public partial class CircularChild
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public CircularParent? Parent { get; set; }
+    }
+
+    [ToJson]
+    public partial class SelfReferencingModel
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public SelfReferencingModel? Next { get; set; }
+    }
 }
