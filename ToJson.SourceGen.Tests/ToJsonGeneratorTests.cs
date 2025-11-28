@@ -5,7 +5,7 @@ namespace ToJson.SourceGen.Tests
 {
     public class ToJsonGeneratorTests
     {
-        private readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
+        private readonly JsonSerializerOptions _jsonOptions = new()
         {
             PropertyNamingPolicy = null
         };
@@ -13,7 +13,7 @@ namespace ToJson.SourceGen.Tests
         [Fact]
         public void SimpleModel_ToJson_MatchesSystemTextJson()
         {
-            SimpleModel model = new SimpleModel
+            SimpleModel model = new()
             {
                 Id = 42,
                 Name = "Test",
@@ -29,7 +29,7 @@ namespace ToJson.SourceGen.Tests
         [Fact]
         public void SimpleModel_WithEmptyString_ToJson_MatchesSystemTextJson()
         {
-            SimpleModel model = new SimpleModel
+            SimpleModel model = new()
             {
                 Id = 1,
                 Name = "",
@@ -45,7 +45,7 @@ namespace ToJson.SourceGen.Tests
         [Fact]
         public void NumericModel_ToJson_MatchesSystemTextJson()
         {
-            NumericModel model = new NumericModel
+            NumericModel model = new()
             {
                 IntValue = 123,
                 LongValue = 9876543210L,
@@ -63,7 +63,7 @@ namespace ToJson.SourceGen.Tests
         [Fact]
         public void NumericModel_WithZeroValues_ToJson_MatchesSystemTextJson()
         {
-            NumericModel model = new NumericModel
+            NumericModel model = new()
             {
                 IntValue = 0,
                 LongValue = 0L,
@@ -81,7 +81,7 @@ namespace ToJson.SourceGen.Tests
         [Fact]
         public void NullableModel_WithNullValues_ToJson_MatchesSystemTextJson()
         {
-            NullableModel model = new NullableModel
+            NullableModel model = new()
             {
                 NullableString = null,
                 NullableInt = null,
@@ -97,7 +97,7 @@ namespace ToJson.SourceGen.Tests
         [Fact]
         public void NullableModel_WithValues_ToJson_MatchesSystemTextJson()
         {
-            NullableModel model = new NullableModel
+            NullableModel model = new()
             {
                 NullableString = "Hello",
                 NullableInt = 100,
@@ -113,7 +113,7 @@ namespace ToJson.SourceGen.Tests
         [Fact]
         public void NestedModel_WithNestedObject_ToJson_MatchesSystemTextJson()
         {
-            NestedModel model = new NestedModel
+            NestedModel model = new()
             {
                 Id = 1,
                 NestedObject = new SimpleModel
@@ -133,7 +133,7 @@ namespace ToJson.SourceGen.Tests
         [Fact]
         public void NestedModel_WithNullNestedObject_ToJson_MatchesSystemTextJson()
         {
-            NestedModel model = new NestedModel
+            NestedModel model = new()
             {
                 Id = 1,
                 NestedObject = null
@@ -148,7 +148,7 @@ namespace ToJson.SourceGen.Tests
         [Fact]
         public void ComplexModel_ToJson_MatchesSystemTextJson()
         {
-            ComplexModel model = new ComplexModel
+            ComplexModel model = new()
             {
                 Id = 999,
                 Name = "Complex Test",
@@ -166,7 +166,7 @@ namespace ToJson.SourceGen.Tests
         [Fact]
         public void ComplexModel_WithNullDescription_ToJson_MatchesSystemTextJson()
         {
-            ComplexModel model = new ComplexModel
+            ComplexModel model = new()
             {
                 Id = 888,
                 Name = "No Description",
@@ -184,7 +184,7 @@ namespace ToJson.SourceGen.Tests
         [Fact]
         public void SimpleModel_WithSpecialCharacters_ToJson_MatchesSystemTextJson()
         {
-            SimpleModel model = new SimpleModel
+            SimpleModel model = new()
             {
                 Id = 5,
                 Name = "Test \"quotes\" and \\backslashes\\",

@@ -6,7 +6,9 @@
       "Bash(dotnet build:*)",
       "WebFetch(domain:xunit.net)",
       "Bash(dotnet test:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nAdd comprehensive README for ToJson.SourceGen\n\n- Document installation and usage with examples\n- Include important notes about partial classes and using directive\n- Add examples for basic usage, nested objects, and nullable types\n- Document supported types, limitations, and performance characteristics\n- Update test formatting (linter changes)\n- Update Claude Code tool permissions\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []
