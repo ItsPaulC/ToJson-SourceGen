@@ -1,1 +1,4 @@
-<Solution />
+<Solution>
+  <Project Path="ToJson.SourceGen\ToJson.SourceGen.csproj" />
+  <Project Path="ToJson.SourceGen.Tests\ToJson.SourceGen.Tests.csproj" />
+</Solution>
