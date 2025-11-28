@@ -7,6 +7,7 @@ A C# source generator that automatically creates JSON serialization methods for 
 - **Zero runtime overhead** - Code is generated at compile time
 - **Simple API** - Just add the `[ToJson]` attribute to your class
 - **Type-safe** - Generated code is strongly typed
+- **Collections and arrays** - Supports arrays, `List<T>`, and other `IEnumerable<T>` types
 - **Nested object support** - Automatically handles nested objects with `[ToJson]` attribute
 - **Proper JSON escaping** - Uses `System.Text.Json.JsonEncodedText` for string encoding
 - **Nullable support** - Correctly handles nullable value types and reference types
@@ -19,7 +20,10 @@ A C# source generator that automatically creates JSON serialization methods for 
 - `string` - with proper JSON character escaping
 - Nullable value types: `int?`, `bool?`, etc.
 - Nullable reference types: `string?`, etc.
+- Arrays: `int[]`, `string[]`, etc.
+- Collections: `List<T>`, `IEnumerable<T>`, and other generic collections
 - Nested objects with `[ToJson]` attribute
+- Collections of nested objects: `List<MyClass>` where `MyClass` has `[ToJson]`
 
 ## Installation
 
@@ -133,6 +137,65 @@ string json = product.ToJson();
 // Output: {"Id":100,"Name":"Widget","Price":null,"Description":null}
 ```
 
+### Collections and Arrays
+
+```csharp
+[ToJson]
+public partial class Team
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public int[] Scores { get; set; }
+    public List<string> Members { get; set; }
+}
+
+// Usage
+var team = new Team
+{
+    Id = 1,
+    Name = "Alpha Team",
+    Scores = new[] { 100, 95, 87, 92 },
+    Members = new List<string> { "Alice", "Bob", "Charlie" }
+};
+
+string json = team.ToJson();
+// Output: {"Id":1,"Name":"Alpha Team","Scores":[100,95,87,92],"Members":["Alice","Bob","Charlie"]}
+```
+
+### Collections of Nested Objects
+
+```csharp
+[ToJson]
+public partial class Person
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+}
+
+[ToJson]
+public partial class Company
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public List<Person> Employees { get; set; }
+}
+
+// Usage
+var company = new Company
+{
+    Id = 1,
+    Name = "Acme Corp",
+    Employees = new List<Person>
+    {
+        new Person { Id = 1, Name = "Alice" },
+        new Person { Id = 2, Name = "Bob" }
+    }
+};
+
+string json = company.ToJson();
+// Output: {"Id":1,"Name":"Acme Corp","Employees":[{"Id":1,"Name":"Alice"},{"Id":2,"Name":"Bob"}]}
+```
+
 ## Important Notes
 
 ### Classes Must Be Partial
@@ -197,15 +260,12 @@ Since code is generated at compile time, there is:
 
 ## Limitations
 
-- No collection/array support (yet)
 - No custom naming policies (always uses property names as-is)
 - No indentation or formatting options
 - No circular reference detection
 - No polymorphism support
+- No support for dictionaries or non-generic collections
 
-## License
-
-This project is for learning and demonstration purposes.
 
 ## Contributing
 

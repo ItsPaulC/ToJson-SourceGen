@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+
 namespace ToJson.SourceGen.Tests
 {
     [ToJson]
@@ -41,5 +44,40 @@ namespace ToJson.SourceGen.Tests
         public double Price { get; set; }
         public bool Available { get; set; }
         public string? Description { get; set; }
+    }
+
+    [ToJson]
+    public partial class ArrayModel
+    {
+        public int[] Numbers { get; set; } = Array.Empty<int>();
+        public string[] Names { get; set; } = Array.Empty<string>();
+    }
+
+    [ToJson]
+    public partial class ListModel
+    {
+        public List<int> Numbers { get; set; } = new();
+        public List<string> Names { get; set; } = new();
+    }
+
+    [ToJson]
+    public partial class CollectionWithNullsModel
+    {
+        public int[]? NullableArray { get; set; }
+        public List<string?>? NullableList { get; set; }
+    }
+
+    [ToJson]
+    public partial class NestedCollectionModel
+    {
+        public int Id { get; set; }
+        public List<SimpleModel> Items { get; set; } = new();
+    }
+
+    [ToJson]
+    public partial class EmptyCollectionModel
+    {
+        public int[] EmptyArray { get; set; } = Array.Empty<int>();
+        public List<string> EmptyList { get; set; } = new();
     }
 }

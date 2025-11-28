@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using Xunit;
 
@@ -189,6 +191,116 @@ namespace ToJson.SourceGen.Tests
                 Id = 5,
                 Name = "Test \"quotes\" and \\backslashes\\",
                 IsActive = true
+            };
+
+            string generatedJson = model.ToJson();
+            string systemTextJson = JsonSerializer.Serialize(model, _jsonOptions);
+
+            Assert.Equal(systemTextJson, generatedJson);
+        }
+
+        [Fact]
+        public void ArrayModel_WithIntArray_ToJson_MatchesSystemTextJson()
+        {
+            ArrayModel model = new()
+            {
+                Numbers = new[] { 1, 2, 3, 4, 5 },
+                Names = new[] { "Alice", "Bob", "Charlie" }
+            };
+
+            string generatedJson = model.ToJson();
+            string systemTextJson = JsonSerializer.Serialize(model, _jsonOptions);
+
+            Assert.Equal(systemTextJson, generatedJson);
+        }
+
+        [Fact]
+        public void ListModel_WithList_ToJson_MatchesSystemTextJson()
+        {
+            ListModel model = new()
+            {
+                Numbers = new List<int> { 10, 20, 30 },
+                Names = new List<string> { "One", "Two", "Three" }
+            };
+
+            string generatedJson = model.ToJson();
+            string systemTextJson = JsonSerializer.Serialize(model, _jsonOptions);
+
+            Assert.Equal(systemTextJson, generatedJson);
+        }
+
+        [Fact]
+        public void EmptyCollectionModel_ToJson_MatchesSystemTextJson()
+        {
+            EmptyCollectionModel model = new()
+            {
+                EmptyArray = Array.Empty<int>(),
+                EmptyList = new List<string>()
+            };
+
+            string generatedJson = model.ToJson();
+            string systemTextJson = JsonSerializer.Serialize(model, _jsonOptions);
+
+            Assert.Equal(systemTextJson, generatedJson);
+        }
+
+        [Fact]
+        public void CollectionWithNullsModel_WithNullCollection_ToJson_MatchesSystemTextJson()
+        {
+            CollectionWithNullsModel model = new()
+            {
+                NullableArray = null,
+                NullableList = null
+            };
+
+            string generatedJson = model.ToJson();
+            string systemTextJson = JsonSerializer.Serialize(model, _jsonOptions);
+
+            Assert.Equal(systemTextJson, generatedJson);
+        }
+
+        [Fact]
+        public void CollectionWithNullsModel_WithNullElements_ToJson_MatchesSystemTextJson()
+        {
+            CollectionWithNullsModel model = new()
+            {
+                NullableArray = new[] { 1, 2, 3 },
+                NullableList = new List<string?> { "Hello", null, "World" }
+            };
+
+            string generatedJson = model.ToJson();
+            string systemTextJson = JsonSerializer.Serialize(model, _jsonOptions);
+
+            Assert.Equal(systemTextJson, generatedJson);
+        }
+
+        [Fact]
+        public void NestedCollectionModel_ToJson_MatchesSystemTextJson()
+        {
+            NestedCollectionModel model = new()
+            {
+                Id = 100,
+                Items = new List<SimpleModel>
+                {
+                    new() { Id = 1, Name = "First", IsActive = true },
+                    new() { Id = 2, Name = "Second", IsActive = false },
+                    new() { Id = 3, Name = "Third", IsActive = true }
+                }
+            };
+
+            string generatedJson = model.ToJson();
+            string systemTextJson = JsonSerializer.Serialize(model, _jsonOptions);
+
+            Assert.Equal(systemTextJson, generatedJson);
+        }
+
+        [Fact]
+        public void ArrayModel_WithEmptyArrays_ToJson_MatchesSystemTextJson()
+        {
+            ArrayModel model = new()
+            {
+                Numbers = Array.Empty<int>(),
+                Names = Array.Empty<string>()
             };
 
             string generatedJson = model.ToJson();

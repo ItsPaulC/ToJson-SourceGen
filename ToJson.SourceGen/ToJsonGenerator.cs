@@ -169,6 +169,18 @@ namespace ToJson
                 return $"({memberName}.HasValue ? {underlyingExpression} : \"null\")";
             }
 
+            // Handle arrays
+            if (typeSymbol is IArrayTypeSymbol arrayType)
+            {
+                return GenerateArrayExpression(arrayType, memberName);
+            }
+
+            // Handle collections (IEnumerable<T>)
+            if (TryGetEnumerableElementType(typeSymbol, out ITypeSymbol? elementType))
+            {
+                return GenerateCollectionExpression(elementType!, memberName);
+            }
+
             // Handle null for reference types
             bool isNullable = typeSymbol.IsReferenceType || typeSymbol.NullableAnnotation == NullableAnnotation.Annotated;
             string nullCheck = isNullable ? $"({memberName} == null ? \"null\" : " : "";
@@ -217,6 +229,57 @@ namespace ToJson
                     // Fallback: use ToString and quote it
                     return $"{nullCheck}\"\\\"\" + {memberName}.ToString() + \"\\\"\"{nullCheckClose}";
             }
+        }
+
+        private static string GenerateArrayExpression(IArrayTypeSymbol arrayType, string memberName)
+        {
+            ITypeSymbol elementType = arrayType.ElementType;
+            return GenerateCollectionExpression(elementType, memberName);
+        }
+
+        private static string GenerateCollectionExpression(ITypeSymbol elementType, string memberName)
+        {
+            // Generate a unique variable name for the loop
+            string itemVar = $"item_{memberName}";
+            string firstVar = $"first_{memberName}";
+
+            string itemExpression = GenerateValueExpression(elementType, itemVar);
+
+            return $@"({memberName} == null ? ""null"" : ""["" + string.Join("","", System.Linq.Enumerable.Select({memberName}, {itemVar} => {itemExpression})) + ""]"")";
+        }
+
+        private static bool TryGetEnumerableElementType(ITypeSymbol typeSymbol, out ITypeSymbol? elementType)
+        {
+            elementType = null;
+
+            // Skip string (it's IEnumerable<char> but we don't want to treat it as a collection)
+            if (typeSymbol.SpecialType == SpecialType.System_String)
+            {
+                return false;
+            }
+
+            // Check if it's a named type that implements IEnumerable<T>
+            if (typeSymbol is INamedTypeSymbol namedType)
+            {
+                // Check the type itself
+                if (namedType.OriginalDefinition.SpecialType == SpecialType.System_Collections_Generic_IEnumerable_T)
+                {
+                    elementType = namedType.TypeArguments.FirstOrDefault();
+                    return elementType != null;
+                }
+
+                // Check all interfaces
+                foreach (INamedTypeSymbol interfaceType in namedType.AllInterfaces)
+                {
+                    if (interfaceType.OriginalDefinition.SpecialType == SpecialType.System_Collections_Generic_IEnumerable_T)
+                    {
+                        elementType = interfaceType.TypeArguments.FirstOrDefault();
+                        return elementType != null;
+                    }
+                }
+            }
+
+            return false;
         }
     }
 }
