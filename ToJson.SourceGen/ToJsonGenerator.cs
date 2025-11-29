@@ -187,9 +187,8 @@ namespace ToJson
             sb.AppendLine("            var sb = new System.Text.StringBuilder();");
             sb.AppendLine("            string indent = indented && depth < IndentCache.Length ? IndentCache[depth] : (indented ? new string(' ', depth * 2) : \"\");");
             sb.AppendLine("            string indent2 = indented && depth + 1 < IndentCache.Length ? IndentCache[depth + 1] : (indented ? new string(' ', (depth + 1) * 2) : \"\");");
-            sb.AppendLine("            string newline = indented ? \"\\r\\n\" : \"\";");
-            sb.AppendLine("            sb.Append(\"{\");");
-            sb.AppendLine("            sb.Append(newline);");
+            sb.AppendLine("            sb.Append('{');");
+            sb.AppendLine("            if (indented) sb.Append(\"\\r\\n\");");
 
             // Build list of public instance properties and fields (avoiding LINQ for compile-time performance)
             List<ISymbol> members = new List<ISymbol>();
@@ -231,8 +230,7 @@ namespace ToJson
 
                 if (!first)
                 {
-                    sb.AppendLine("            sb.Append(\",\");");
-                    sb.AppendLine("            sb.Append(newline);");
+                    sb.AppendLine("            if (indented) sb.Append(\",\\r\\n\"); else sb.Append(',');");
                 }
                 first = false;
 
@@ -271,9 +269,12 @@ namespace ToJson
                 }
             }
 
-            sb.AppendLine("            sb.Append(newline);");
-            sb.AppendLine("            sb.Append(indent);");
-            sb.AppendLine("            sb.Append(\"}\");");
+            sb.AppendLine("            if (indented)");
+            sb.AppendLine("            {");
+            sb.AppendLine("                sb.Append(\"\\r\\n\");");
+            sb.AppendLine("                sb.Append(indent);");
+            sb.AppendLine("            }");
+            sb.AppendLine("            sb.Append('}');");
             sb.AppendLine("            return sb.ToString();");
             sb.AppendLine("        }");
 
@@ -389,18 +390,20 @@ namespace ToJson
             sb.AppendLine("            var sb = new System.Text.StringBuilder();");
             sb.AppendLine($"            string itemIndent = indented && depth + 2 < {className}.IndentCache.Length ? {className}.IndentCache[depth + 2] : (indented ? new string(' ', (depth + 2) * 2) : \"\");");
             sb.AppendLine($"            string closeIndent = indented && depth + 1 < {className}.IndentCache.Length ? {className}.IndentCache[depth + 1] : (indented ? new string(' ', (depth + 1) * 2) : \"\");");
-            sb.AppendLine("            string newline = indented ? \"\\r\\n\" : \"\";");
-            sb.AppendLine("            sb.Append(\"[\");");
+            sb.AppendLine("            sb.Append('[');");
             sb.AppendLine("            bool first = true;");
             sb.AppendLine($"            foreach (var {itemVar} in collection)");
             sb.AppendLine("            {");
             sb.AppendLine("                if (!first)");
             sb.AppendLine("                {");
-            sb.AppendLine("                    sb.Append(\",\");");
+            sb.AppendLine("                    sb.Append(',');");
             sb.AppendLine("                }");
             sb.AppendLine("                first = false;");
-            sb.AppendLine("                sb.Append(newline);");
-            sb.AppendLine("                sb.Append(itemIndent);");
+            sb.AppendLine("                if (indented)");
+            sb.AppendLine("                {");
+            sb.AppendLine("                    sb.Append(\"\\r\\n\");");
+            sb.AppendLine("                    sb.Append(itemIndent);");
+            sb.AppendLine("                }");
 
             // Optimize string serialization in collections to avoid temporary allocations
             if (elementType.SpecialType == SpecialType.System_String)
@@ -435,10 +438,10 @@ namespace ToJson
             sb.AppendLine("            }");
             sb.AppendLine("            if (indented && !first)");
             sb.AppendLine("            {");
-            sb.AppendLine("                sb.Append(newline);");
+            sb.AppendLine("                sb.Append(\"\\r\\n\");");
             sb.AppendLine("                sb.Append(closeIndent);");
             sb.AppendLine("            }");
-            sb.AppendLine("            sb.Append(\"]\");");
+            sb.AppendLine("            sb.Append(']');");
             sb.AppendLine("            return sb.ToString();");
             sb.AppendLine("        }");
             return sb.ToString();
