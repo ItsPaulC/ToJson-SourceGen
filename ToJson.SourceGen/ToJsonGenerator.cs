@@ -83,9 +83,8 @@ namespace ToJson
                 return;
             }
 
-            IEnumerable<ClassDeclarationSyntax> distinctClasses = classes.Distinct();
-
-            foreach (ClassDeclarationSyntax classDeclaration in distinctClasses)
+            // Incremental generator already provides distinct items, no need for Distinct()
+            foreach (ClassDeclarationSyntax classDeclaration in classes)
             {
                 SemanticModel semanticModel = compilation.GetSemanticModel(classDeclaration.SyntaxTree);
                 INamedTypeSymbol? classSymbol = semanticModel.GetDeclaredSymbol(classDeclaration) as INamedTypeSymbol;
