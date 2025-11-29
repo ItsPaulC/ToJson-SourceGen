@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Text.Json;
 using ToJson;
 using Xunit;
@@ -211,8 +209,8 @@ namespace SourceGen.ToJson.Tests
         {
             ArrayModel model = new()
             {
-                Numbers = new[] { 1, 2, 3, 4, 5 },
-                Names = new[] { "Alice", "Bob", "Charlie" }
+                Numbers = [1, 2, 3, 4, 5],
+                Names = ["Alice", "Bob", "Charlie"]
             };
 
             string generatedJson = model.ToJson(JsonSerializationStyle.Minimized);
