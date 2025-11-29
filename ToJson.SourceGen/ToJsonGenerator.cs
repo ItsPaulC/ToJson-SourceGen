@@ -57,17 +57,37 @@ namespace ToJson
         {
             ClassDeclarationSyntax classDeclaration = (ClassDeclarationSyntax)context.Node;
 
+            if (classDeclaration == null || context.SemanticModel == null)
+            {
+                return null;
+            }
+
             foreach (AttributeListSyntax attributeList in classDeclaration.AttributeLists)
             {
+                if (attributeList == null)
+                {
+                    continue;
+                }
+
                 foreach (AttributeSyntax attribute in attributeList.Attributes)
                 {
+                    if (attribute == null)
+                    {
+                        continue;
+                    }
+
                     IMethodSymbol? attributeSymbol = context.SemanticModel.GetSymbolInfo(attribute).Symbol as IMethodSymbol;
                     if (attributeSymbol == null)
                     {
                         continue;
                     }
 
-                    INamedTypeSymbol attributeContainingTypeSymbol = attributeSymbol.ContainingType;
+                    INamedTypeSymbol? attributeContainingTypeSymbol = attributeSymbol.ContainingType;
+                    if (attributeContainingTypeSymbol == null)
+                    {
+                        continue;
+                    }
+
                     string fullName = attributeContainingTypeSymbol.ToDisplayString();
 
                     if (fullName == ToJsonAttributeFullName)
@@ -82,6 +102,11 @@ namespace ToJson
 
         private static void Execute(Compilation compilation, ImmutableArray<ClassDeclarationSyntax> classes, SourceProductionContext context)
         {
+            if (compilation == null)
+            {
+                return;
+            }
+
             if (classes.IsDefaultOrEmpty)
             {
                 return;
@@ -90,7 +115,17 @@ namespace ToJson
             // Incremental generator already provides distinct items, no need for Distinct()
             foreach (ClassDeclarationSyntax classDeclaration in classes)
             {
-                SemanticModel semanticModel = compilation.GetSemanticModel(classDeclaration.SyntaxTree);
+                if (classDeclaration == null || classDeclaration.SyntaxTree == null)
+                {
+                    continue;
+                }
+
+                SemanticModel? semanticModel = compilation.GetSemanticModel(classDeclaration.SyntaxTree);
+                if (semanticModel == null)
+                {
+                    continue;
+                }
+
                 INamedTypeSymbol? classSymbol = semanticModel.GetDeclaredSymbol(classDeclaration) as INamedTypeSymbol;
 
                 if (classSymbol == null)
@@ -98,8 +133,14 @@ namespace ToJson
                     continue;
                 }
 
-                string namespaceName = classSymbol.ContainingNamespace.ToDisplayString();
+                string namespaceName = classSymbol.ContainingNamespace?.ToDisplayString() ?? "global";
                 string className = classSymbol.Name;
+
+                if (string.IsNullOrEmpty(className))
+                {
+                    continue;
+                }
+
                 string source = GenerateToJsonMethod(classSymbol, namespaceName, className);
 
                 context.AddSource($"{className}.ToJson.g.cs", SourceText.From(source, Encoding.UTF8));
@@ -108,6 +149,21 @@ namespace ToJson
 
         private static string GenerateToJsonMethod(INamedTypeSymbol classSymbol, string namespaceName, string className)
         {
+            if (classSymbol == null)
+            {
+                throw new System.ArgumentNullException(nameof(classSymbol));
+            }
+
+            if (string.IsNullOrEmpty(namespaceName))
+            {
+                namespaceName = "global";
+            }
+
+            if (string.IsNullOrEmpty(className))
+            {
+                throw new System.ArgumentNullException(nameof(className));
+            }
+
             StringBuilder sb = new StringBuilder();
             List<(string memberName, ITypeSymbol elementType)> collectionMembers = new List<(string, ITypeSymbol)>();
 
@@ -310,6 +366,16 @@ namespace ToJson
 
         private static string GenerateValueExpression(ITypeSymbol typeSymbol, string memberName, string indentedVar = "false", string depthVar = "0", string visitedVar = "null")
         {
+            if (typeSymbol == null)
+            {
+                throw new System.ArgumentNullException(nameof(typeSymbol));
+            }
+
+            if (string.IsNullOrEmpty(memberName))
+            {
+                throw new System.ArgumentNullException(nameof(memberName));
+            }
+
             // Handle nullable value types
             if (typeSymbol is INamedTypeSymbol { IsValueType: true, NullableAnnotation: NullableAnnotation.Annotated } namedTypeSymbol)
             {
@@ -398,6 +464,21 @@ namespace ToJson
 
         private static string GenerateCollectionHelperMethod(string memberName, ITypeSymbol elementType, string className)
         {
+            if (string.IsNullOrEmpty(memberName))
+            {
+                throw new System.ArgumentNullException(nameof(memberName));
+            }
+
+            if (elementType == null)
+            {
+                throw new System.ArgumentNullException(nameof(elementType));
+            }
+
+            if (string.IsNullOrEmpty(className))
+            {
+                throw new System.ArgumentNullException(nameof(className));
+            }
+
             string itemVar = $"item_{memberName}";
 
             StringBuilder sb = new StringBuilder();
