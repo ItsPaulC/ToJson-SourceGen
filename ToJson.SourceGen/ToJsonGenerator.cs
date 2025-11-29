@@ -191,9 +191,17 @@ namespace ToJson
             sb.AppendLine("            sb.Append(\"{\");");
             sb.AppendLine("            sb.Append(newline);");
 
-            IEnumerable<ISymbol> members = classSymbol.GetMembers()
-                .Where(m => m.Kind == SymbolKind.Property || m.Kind == SymbolKind.Field)
-                .Where(m => !m.IsStatic && m.DeclaredAccessibility == Accessibility.Public);
+            // Build list of public instance properties and fields (avoiding LINQ for compile-time performance)
+            List<ISymbol> members = new List<ISymbol>();
+            foreach (ISymbol member in classSymbol.GetMembers())
+            {
+                if ((member.Kind == SymbolKind.Property || member.Kind == SymbolKind.Field)
+                    && !member.IsStatic
+                    && member.DeclaredAccessibility == Accessibility.Public)
+                {
+                    members.Add(member);
+                }
+            }
 
             bool first = true;
             foreach (ISymbol member in members)
