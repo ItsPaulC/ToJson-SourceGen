@@ -184,6 +184,12 @@ namespace ToJson
             sb.AppendLine("                throw new System.Text.Json.JsonException(\"Circular reference detected in object graph.\");");
             sb.AppendLine("            }");
             sb.AppendLine();
+            sb.AppendLine("            // Prevent stack overflow on deeply nested (but non-circular) structures");
+            sb.AppendLine("            if (depth > 100)");
+            sb.AppendLine("            {");
+            sb.AppendLine("                throw new System.Text.Json.JsonException(\"Maximum serialization depth of 100 exceeded. Object graph is too deep.\");");
+            sb.AppendLine("            }");
+            sb.AppendLine();
             sb.AppendLine("            // Pre-allocate StringBuilder with reasonable capacity to avoid reallocations");
             sb.AppendLine("            var sb = new System.Text.StringBuilder(256);");
             sb.AppendLine("            string indent = indented && depth < IndentCache.Length ? IndentCache[depth] : (indented ? new string(' ', depth * 2) : \"\");");
