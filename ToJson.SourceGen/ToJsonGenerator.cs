@@ -19,9 +19,21 @@ namespace ToJson.SourceGen
         private const string AttributeSourceCode = @"
 namespace ToJson
 {
+    public enum JsonSerializationStyle
+    {
+        Indented,
+        Minimized
+    }
+
     [System.AttributeUsage(System.AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
     public sealed class ToJsonAttribute : System.Attribute
     {
+        public JsonSerializationStyle DefaultStyle { get; }
+
+        public ToJsonAttribute(JsonSerializationStyle defaultStyle = JsonSerializationStyle.Indented)
+        {
+            DefaultStyle = defaultStyle;
+        }
     }
 }";
 
@@ -141,13 +153,27 @@ namespace ToJson
                     continue;
                 }
 
-                string source = GenerateToJsonMethod(classSymbol, namespaceName, className);
+                // Extract the default style from the attribute
+                string defaultStyle = "Indented"; // Default value
+                AttributeData? toJsonAttribute = classSymbol.GetAttributes()
+                    .FirstOrDefault(attr => attr.AttributeClass?.ToDisplayString() == ToJsonAttributeFullName);
+
+                if (toJsonAttribute != null && toJsonAttribute.ConstructorArguments.Length > 0)
+                {
+                    TypedConstant arg = toJsonAttribute.ConstructorArguments[0];
+                    if (arg.Value is int enumValue)
+                    {
+                        defaultStyle = enumValue == 0 ? "Indented" : "Minimized";
+                    }
+                }
+
+                string source = GenerateToJsonMethod(classSymbol, namespaceName, className, defaultStyle);
 
                 context.AddSource($"{className}.ToJson.g.cs", SourceText.From(source, Encoding.UTF8));
             }
         }
 
-        private static string GenerateToJsonMethod(INamedTypeSymbol classSymbol, string namespaceName, string className)
+        private static string GenerateToJsonMethod(INamedTypeSymbol classSymbol, string namespaceName, string className, string defaultStyle)
         {
             if (classSymbol == null)
             {
@@ -200,16 +226,17 @@ namespace ToJson
             sb.AppendLine("        private static System.Collections.Generic.HashSet<object>? t_visitedCache;");
             sb.AppendLine();
 
-            // Generate overload without parameters (defaults to non-indented)
+            // Generate overload without parameters (uses default from attribute)
             sb.AppendLine("        public string ToJson()");
             sb.AppendLine("        {");
-            sb.AppendLine("            return ToJson(false);");
+            sb.AppendLine($"            return ToJson(global::ToJson.JsonSerializationStyle.{defaultStyle});");
             sb.AppendLine("        }");
             sb.AppendLine();
 
-            // Generate main method with indentation parameter
-            sb.AppendLine("        public string ToJson(bool indented)");
+            // Generate main method with style parameter
+            sb.AppendLine("        public string ToJson(global::ToJson.JsonSerializationStyle style)");
             sb.AppendLine("        {");
+            sb.AppendLine("            bool indented = style == global::ToJson.JsonSerializationStyle.Indented;");
             sb.AppendLine("            // Try to reuse cached HashSet, or create new one if cache is empty");
             sb.AppendLine("            var visited = t_visitedCache;");
             sb.AppendLine("            if (visited == null)");

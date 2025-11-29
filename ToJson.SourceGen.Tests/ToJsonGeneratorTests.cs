@@ -28,7 +28,7 @@ namespace ToJson.SourceGen.Tests
                 IsActive = true
             };
 
-            string generatedJson = model.ToJson();
+            string generatedJson = model.ToJson(ToJson.JsonSerializationStyle.Minimized);
             string systemTextJson = JsonSerializer.Serialize(model, _jsonOptions);
 
             Assert.Equal(systemTextJson, generatedJson);
@@ -44,7 +44,7 @@ namespace ToJson.SourceGen.Tests
                 IsActive = false
             };
 
-            string generatedJson = model.ToJson();
+            string generatedJson = model.ToJson(ToJson.JsonSerializationStyle.Minimized);
             string systemTextJson = JsonSerializer.Serialize(model, _jsonOptions);
 
             Assert.Equal(systemTextJson, generatedJson);
@@ -62,7 +62,7 @@ namespace ToJson.SourceGen.Tests
                 FloatValue = 2.5f
             };
 
-            string generatedJson = model.ToJson();
+            string generatedJson = model.ToJson(ToJson.JsonSerializationStyle.Minimized);
             string systemTextJson = JsonSerializer.Serialize(model, _jsonOptions);
 
             Assert.Equal(systemTextJson, generatedJson);
@@ -80,7 +80,7 @@ namespace ToJson.SourceGen.Tests
                 FloatValue = 0f
             };
 
-            string generatedJson = model.ToJson();
+            string generatedJson = model.ToJson(ToJson.JsonSerializationStyle.Minimized);
             string systemTextJson = JsonSerializer.Serialize(model, _jsonOptions);
 
             Assert.Equal(systemTextJson, generatedJson);
@@ -96,7 +96,7 @@ namespace ToJson.SourceGen.Tests
                 NullableBool = null
             };
 
-            string generatedJson = model.ToJson();
+            string generatedJson = model.ToJson(ToJson.JsonSerializationStyle.Minimized);
             string systemTextJson = JsonSerializer.Serialize(model, _jsonOptions);
 
             Assert.Equal(systemTextJson, generatedJson);
@@ -112,7 +112,7 @@ namespace ToJson.SourceGen.Tests
                 NullableBool = true
             };
 
-            string generatedJson = model.ToJson();
+            string generatedJson = model.ToJson(ToJson.JsonSerializationStyle.Minimized);
             string systemTextJson = JsonSerializer.Serialize(model, _jsonOptions);
 
             Assert.Equal(systemTextJson, generatedJson);
@@ -132,7 +132,7 @@ namespace ToJson.SourceGen.Tests
                 }
             };
 
-            string generatedJson = model.ToJson();
+            string generatedJson = model.ToJson(ToJson.JsonSerializationStyle.Minimized);
             string systemTextJson = JsonSerializer.Serialize(model, _jsonOptions);
 
             Assert.Equal(systemTextJson, generatedJson);
@@ -147,7 +147,7 @@ namespace ToJson.SourceGen.Tests
                 NestedObject = null
             };
 
-            string generatedJson = model.ToJson();
+            string generatedJson = model.ToJson(ToJson.JsonSerializationStyle.Minimized);
             string systemTextJson = JsonSerializer.Serialize(model, _jsonOptions);
 
             Assert.Equal(systemTextJson, generatedJson);
@@ -165,7 +165,7 @@ namespace ToJson.SourceGen.Tests
                 Description = "A complex model with multiple property types"
             };
 
-            string generatedJson = model.ToJson();
+            string generatedJson = model.ToJson(ToJson.JsonSerializationStyle.Minimized);
             string systemTextJson = JsonSerializer.Serialize(model, _jsonOptions);
 
             Assert.Equal(systemTextJson, generatedJson);
@@ -183,7 +183,7 @@ namespace ToJson.SourceGen.Tests
                 Description = null
             };
 
-            string generatedJson = model.ToJson();
+            string generatedJson = model.ToJson(ToJson.JsonSerializationStyle.Minimized);
             string systemTextJson = JsonSerializer.Serialize(model, _jsonOptions);
 
             Assert.Equal(systemTextJson, generatedJson);
@@ -199,7 +199,7 @@ namespace ToJson.SourceGen.Tests
                 IsActive = true
             };
 
-            string generatedJson = model.ToJson();
+            string generatedJson = model.ToJson(ToJson.JsonSerializationStyle.Minimized);
             string systemTextJson = JsonSerializer.Serialize(model, _jsonOptions);
 
             Assert.Equal(systemTextJson, generatedJson);
@@ -214,7 +214,7 @@ namespace ToJson.SourceGen.Tests
                 Names = new[] { "Alice", "Bob", "Charlie" }
             };
 
-            string generatedJson = model.ToJson();
+            string generatedJson = model.ToJson(ToJson.JsonSerializationStyle.Minimized);
             string systemTextJson = JsonSerializer.Serialize(model, _jsonOptions);
 
             Assert.Equal(systemTextJson, generatedJson);
@@ -229,7 +229,7 @@ namespace ToJson.SourceGen.Tests
                 Names = new List<string> { "One", "Two", "Three" }
             };
 
-            string generatedJson = model.ToJson();
+            string generatedJson = model.ToJson(ToJson.JsonSerializationStyle.Minimized);
             string systemTextJson = JsonSerializer.Serialize(model, _jsonOptions);
 
             Assert.Equal(systemTextJson, generatedJson);
@@ -244,7 +244,7 @@ namespace ToJson.SourceGen.Tests
                 EmptyList = new List<string>()
             };
 
-            string generatedJson = model.ToJson();
+            string generatedJson = model.ToJson(ToJson.JsonSerializationStyle.Minimized);
             string systemTextJson = JsonSerializer.Serialize(model, _jsonOptions);
 
             Assert.Equal(systemTextJson, generatedJson);
@@ -259,7 +259,7 @@ namespace ToJson.SourceGen.Tests
                 NullableList = null
             };
 
-            string generatedJson = model.ToJson();
+            string generatedJson = model.ToJson(ToJson.JsonSerializationStyle.Minimized);
             string systemTextJson = JsonSerializer.Serialize(model, _jsonOptions);
 
             Assert.Equal(systemTextJson, generatedJson);
@@ -274,7 +274,7 @@ namespace ToJson.SourceGen.Tests
                 NullableList = new List<string?> { "Hello", null, "World" }
             };
 
-            string generatedJson = model.ToJson();
+            string generatedJson = model.ToJson(ToJson.JsonSerializationStyle.Minimized);
             string systemTextJson = JsonSerializer.Serialize(model, _jsonOptions);
 
             Assert.Equal(systemTextJson, generatedJson);
@@ -294,7 +294,7 @@ namespace ToJson.SourceGen.Tests
                 }
             };
 
-            string generatedJson = model.ToJson();
+            string generatedJson = model.ToJson(ToJson.JsonSerializationStyle.Minimized);
             string systemTextJson = JsonSerializer.Serialize(model, _jsonOptions);
 
             Assert.Equal(systemTextJson, generatedJson);
@@ -309,7 +309,7 @@ namespace ToJson.SourceGen.Tests
                 Names = Array.Empty<string>()
             };
 
-            string generatedJson = model.ToJson();
+            string generatedJson = model.ToJson(ToJson.JsonSerializationStyle.Minimized);
             string systemTextJson = JsonSerializer.Serialize(model, _jsonOptions);
 
             Assert.Equal(systemTextJson, generatedJson);
@@ -327,7 +327,7 @@ namespace ToJson.SourceGen.Tests
                 IsActive = true
             };
 
-            string generatedJson = model.ToJson(true);
+            string generatedJson = model.ToJson(ToJson.JsonSerializationStyle.Indented);
             string systemTextJson = JsonSerializer.Serialize(model, _indentedJsonOptions);
 
             Assert.Equal(systemTextJson, generatedJson);
@@ -345,7 +345,7 @@ namespace ToJson.SourceGen.Tests
                 Description = "A complex model"
             };
 
-            string generatedJson = model.ToJson(true);
+            string generatedJson = model.ToJson(ToJson.JsonSerializationStyle.Indented);
             string systemTextJson = JsonSerializer.Serialize(model, _indentedJsonOptions);
 
             Assert.Equal(systemTextJson, generatedJson);
@@ -365,7 +365,7 @@ namespace ToJson.SourceGen.Tests
                 }
             };
 
-            string generatedJson = model.ToJson(true);
+            string generatedJson = model.ToJson(ToJson.JsonSerializationStyle.Indented);
             string systemTextJson = JsonSerializer.Serialize(model, _indentedJsonOptions);
 
             Assert.Equal(systemTextJson, generatedJson);
@@ -380,7 +380,7 @@ namespace ToJson.SourceGen.Tests
                 Names = new[] { "Alice", "Bob", "Charlie" }
             };
 
-            string generatedJson = model.ToJson(true);
+            string generatedJson = model.ToJson(ToJson.JsonSerializationStyle.Indented);
             string systemTextJson = JsonSerializer.Serialize(model, _indentedJsonOptions);
 
             Assert.Equal(systemTextJson, generatedJson);
@@ -399,7 +399,7 @@ namespace ToJson.SourceGen.Tests
                 }
             };
 
-            string generatedJson = model.ToJson(true);
+            string generatedJson = model.ToJson(ToJson.JsonSerializationStyle.Indented);
             string systemTextJson = JsonSerializer.Serialize(model, _indentedJsonOptions);
 
             Assert.Equal(systemTextJson, generatedJson);
@@ -415,7 +415,7 @@ namespace ToJson.SourceGen.Tests
                 NullableBool = null
             };
 
-            string generatedJson = model.ToJson(true);
+            string generatedJson = model.ToJson(ToJson.JsonSerializationStyle.Indented);
             string systemTextJson = JsonSerializer.Serialize(model, _indentedJsonOptions);
 
             Assert.Equal(systemTextJson, generatedJson);
@@ -536,7 +536,7 @@ namespace ToJson.SourceGen.Tests
             // node3.Next is null
 
             // Should not throw
-            string json = node1.ToJson();
+            string json = node1.ToJson(ToJson.JsonSerializationStyle.Minimized);
             Assert.NotNull(json);
             Assert.Contains("\"Id\":1", json);
             Assert.Contains("\"Id\":2", json);
@@ -559,7 +559,7 @@ namespace ToJson.SourceGen.Tests
             };
 
             // Should not throw
-            string json = parent.ToJson();
+            string json = parent.ToJson(ToJson.JsonSerializationStyle.Minimized);
             Assert.NotNull(json);
             Assert.Contains("\"Id\":1", json);
             Assert.Contains("\"Id\":2", json);
