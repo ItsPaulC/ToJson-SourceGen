@@ -202,8 +202,35 @@ namespace ToJson
                 sb.AppendLine($"            sb.Append(\"\\\"{memberName}\\\":\");");
                 sb.AppendLine("            if (indented) sb.Append(\" \");");
 
-                string valueExpression = GenerateValueExpression(memberType, memberName, "indented", "depth", "visited");
-                sb.AppendLine($"            sb.Append({valueExpression});");
+                // Optimize string serialization to avoid temporary allocations
+                if (memberType.SpecialType == SpecialType.System_String)
+                {
+                    bool isNullable = memberType.IsReferenceType || memberType.NullableAnnotation == NullableAnnotation.Annotated;
+                    if (isNullable)
+                    {
+                        sb.AppendLine($"            if ({memberName} == null)");
+                        sb.AppendLine("            {");
+                        sb.AppendLine("                sb.Append(\"null\");");
+                        sb.AppendLine("            }");
+                        sb.AppendLine("            else");
+                        sb.AppendLine("            {");
+                        sb.AppendLine("                sb.Append('\"');");
+                        sb.AppendLine($"                sb.Append(System.Text.Json.JsonEncodedText.Encode({memberName}).ToString());");
+                        sb.AppendLine("                sb.Append('\"');");
+                        sb.AppendLine("            }");
+                    }
+                    else
+                    {
+                        sb.AppendLine("                sb.Append('\"');");
+                        sb.AppendLine($"                sb.Append(System.Text.Json.JsonEncodedText.Encode({memberName}).ToString());");
+                        sb.AppendLine("                sb.Append('\"');");
+                    }
+                }
+                else
+                {
+                    string valueExpression = GenerateValueExpression(memberType, memberName, "indented", "depth", "visited");
+                    sb.AppendLine($"            sb.Append({valueExpression});");
+                }
             }
 
             sb.AppendLine("            sb.Append(newline);");
@@ -316,7 +343,6 @@ namespace ToJson
         private static string GenerateCollectionHelperMethod(string memberName, ITypeSymbol elementType, string className)
         {
             string itemVar = $"item_{memberName}";
-            string itemExpression = GenerateValueExpression(elementType, itemVar, "indented", "depth + 1", "visited");
 
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"        private static string FormatCollection_{memberName}(System.Collections.Generic.IEnumerable<{elementType.ToDisplayString()}> collection, bool indented, int depth, System.Collections.Generic.HashSet<object> visited)");
@@ -337,7 +363,37 @@ namespace ToJson
             sb.AppendLine("                first = false;");
             sb.AppendLine("                sb.Append(newline);");
             sb.AppendLine("                sb.Append(itemIndent);");
-            sb.AppendLine($"                sb.Append({itemExpression});");
+
+            // Optimize string serialization in collections to avoid temporary allocations
+            if (elementType.SpecialType == SpecialType.System_String)
+            {
+                bool isNullable = elementType.IsReferenceType || elementType.NullableAnnotation == NullableAnnotation.Annotated;
+                if (isNullable)
+                {
+                    sb.AppendLine($"                if ({itemVar} == null)");
+                    sb.AppendLine("                {");
+                    sb.AppendLine("                    sb.Append(\"null\");");
+                    sb.AppendLine("                }");
+                    sb.AppendLine("                else");
+                    sb.AppendLine("                {");
+                    sb.AppendLine("                    sb.Append('\"');");
+                    sb.AppendLine($"                    sb.Append(System.Text.Json.JsonEncodedText.Encode({itemVar}).ToString());");
+                    sb.AppendLine("                    sb.Append('\"');");
+                    sb.AppendLine("                }");
+                }
+                else
+                {
+                    sb.AppendLine("                sb.Append('\"');");
+                    sb.AppendLine($"                sb.Append(System.Text.Json.JsonEncodedText.Encode({itemVar}).ToString());");
+                    sb.AppendLine("                sb.Append('\"');");
+                }
+            }
+            else
+            {
+                string itemExpression = GenerateValueExpression(elementType, itemVar, "indented", "depth + 1", "visited");
+                sb.AppendLine($"                sb.Append({itemExpression});");
+            }
+
             sb.AppendLine("            }");
             sb.AppendLine("            if (indented && !first)");
             sb.AppendLine("            {");
