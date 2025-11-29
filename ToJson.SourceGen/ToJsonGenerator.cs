@@ -184,7 +184,8 @@ namespace ToJson
             sb.AppendLine("                throw new System.Text.Json.JsonException(\"Circular reference detected in object graph.\");");
             sb.AppendLine("            }");
             sb.AppendLine();
-            sb.AppendLine("            var sb = new System.Text.StringBuilder();");
+            sb.AppendLine("            // Pre-allocate StringBuilder with reasonable capacity to avoid reallocations");
+            sb.AppendLine("            var sb = new System.Text.StringBuilder(256);");
             sb.AppendLine("            string indent = indented && depth < IndentCache.Length ? IndentCache[depth] : (indented ? new string(' ', depth * 2) : \"\");");
             sb.AppendLine("            string indent2 = indented && depth + 1 < IndentCache.Length ? IndentCache[depth + 1] : (indented ? new string(' ', (depth + 1) * 2) : \"\");");
             sb.AppendLine("            sb.Append('{');");
