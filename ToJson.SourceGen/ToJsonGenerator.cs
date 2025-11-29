@@ -12,6 +12,10 @@ namespace ToJson.SourceGen
     [Generator]
     public class ToJsonGenerator : IIncrementalGenerator
     {
+        // Cache the fully qualified attribute name to avoid repeated string allocations
+        // and improve compile-time performance when checking for the [ToJson] attribute
+        private const string ToJsonAttributeFullName = "ToJson.ToJsonAttribute";
+
         private const string AttributeSourceCode = @"
 namespace ToJson
 {
@@ -66,7 +70,7 @@ namespace ToJson
                     INamedTypeSymbol attributeContainingTypeSymbol = attributeSymbol.ContainingType;
                     string fullName = attributeContainingTypeSymbol.ToDisplayString();
 
-                    if (fullName == "ToJson.ToJsonAttribute")
+                    if (fullName == ToJsonAttributeFullName)
                     {
                         return classDeclaration;
                     }
@@ -358,7 +362,7 @@ namespace ToJson
                     {
                         // Check if the type has the [ToJson] attribute
                         bool hasToJsonAttribute = namedType.GetAttributes()
-                            .Any(attr => attr.AttributeClass?.ToDisplayString() == "ToJson.ToJsonAttribute");
+                            .Any(attr => attr.AttributeClass?.ToDisplayString() == ToJsonAttributeFullName);
 
                         // Check if the type has a ToJson method (might not be visible during generation)
                         IMethodSymbol? toJsonMethod = namedType.GetMembers("ToJson")
