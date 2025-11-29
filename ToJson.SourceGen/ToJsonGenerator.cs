@@ -112,6 +112,7 @@ namespace ToJson
             sb.AppendLine();
             sb.AppendLine($"namespace {namespaceName}");
             sb.AppendLine("{");
+            sb.AppendLine("    [System.Runtime.CompilerServices.CompilerGenerated]");
             sb.AppendLine($"    partial class {className}");
             sb.AppendLine("    {");
 
