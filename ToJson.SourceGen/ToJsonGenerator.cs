@@ -262,6 +262,11 @@ namespace ToJson
                         sb.AppendLine("                sb.Append('\"');");
                     }
                 }
+                // Optimize collection serialization by passing StringBuilder directly (avoids string allocation)
+                else if (memberType is IArrayTypeSymbol || TryGetEnumerableElementType(memberType, out _))
+                {
+                    sb.AppendLine($"            FormatCollection_{memberName}({memberName}, sb, indented, depth, visited);");
+                }
                 else
                 {
                     string valueExpression = GenerateValueExpression(memberType, memberName, "indented", "depth", "visited");
@@ -384,10 +389,13 @@ namespace ToJson
             string itemVar = $"item_{memberName}";
 
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine($"        private static string FormatCollection_{memberName}(System.Collections.Generic.IEnumerable<{elementType.ToDisplayString()}> collection, bool indented, int depth, System.Collections.Generic.HashSet<object> visited)");
+            sb.AppendLine($"        private static void FormatCollection_{memberName}(System.Collections.Generic.IEnumerable<{elementType.ToDisplayString()}> collection, System.Text.StringBuilder sb, bool indented, int depth, System.Collections.Generic.HashSet<object> visited)");
             sb.AppendLine("        {");
-            sb.AppendLine("            if (collection == null) return \"null\";");
-            sb.AppendLine("            var sb = new System.Text.StringBuilder();");
+            sb.AppendLine("            if (collection == null)");
+            sb.AppendLine("            {");
+            sb.AppendLine("                sb.Append(\"null\");");
+            sb.AppendLine("                return;");
+            sb.AppendLine("            }");
             sb.AppendLine($"            string itemIndent = indented && depth + 2 < {className}.IndentCache.Length ? {className}.IndentCache[depth + 2] : (indented ? new string(' ', (depth + 2) * 2) : \"\");");
             sb.AppendLine($"            string closeIndent = indented && depth + 1 < {className}.IndentCache.Length ? {className}.IndentCache[depth + 1] : (indented ? new string(' ', (depth + 1) * 2) : \"\");");
             sb.AppendLine("            sb.Append('[');");
@@ -442,7 +450,6 @@ namespace ToJson
             sb.AppendLine("                sb.Append(closeIndent);");
             sb.AppendLine("            }");
             sb.AppendLine("            sb.Append(']');");
-            sb.AppendLine("            return sb.ToString();");
             sb.AppendLine("        }");
             return sb.ToString();
         }
