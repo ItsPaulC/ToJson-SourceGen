@@ -1,8 +1,8 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src/ToJson.SourceGen/ToJson.SourceGen.csproj" />
+    <Project Path="src/SourceGen.ToJson/SourceGen.ToJson.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/ToJson.SourceGen.Tests/ToJson.SourceGen.Tests.csproj" />
+    <Project Path="tests/SourceGen.ToJson.Tests/SourceGen.ToJson.Tests.csproj" />
   </Folder>
 </Solution>

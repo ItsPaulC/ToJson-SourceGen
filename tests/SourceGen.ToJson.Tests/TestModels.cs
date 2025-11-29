@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
+using ToJson;
 
-namespace ToJson.SourceGen.Tests
+namespace SourceGen.ToJson.Tests
 {
     [ToJson]
     public partial class SimpleModel
